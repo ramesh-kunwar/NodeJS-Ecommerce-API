@@ -152,3 +152,93 @@ export const getProduct = asyncHandler(async (req, res) => {
     msg: "All products",
   });
 });
+
+/*****************************************************
+ * @desc   Get single products
+ * @route  GET /api/v1/products/:id
+ * @access Public
+ *****************************************************/
+
+export const getSingleProduct = asyncHandler(async (req, res) => {
+  const products = await Product.findById(req.params.id);
+  if (!products) {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+
+  res.status(200).json({
+    products,
+    msg: "Single product",
+  });
+});
+
+/*****************************************************
+ * @desc   update  products
+ * @route  PUT /api/v1/products/:id
+ * @access Admin/private
+ *****************************************************/
+
+export const updateProduct = asyncHandler(async (req, res) => {
+  const {
+    name,
+    description,
+    brand,
+    category,
+    sizes,
+    colors,
+    user,
+    price,
+    totalQty,
+  } = req.body;
+
+  // product exists
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+  // update product
+  const updatedProduct = await Product.findByIdAndUpdate(
+    req.params.id,
+    {
+      name,
+      description,
+      brand,
+      category,
+      sizes,
+      colors,
+      user,
+      price,
+      totalQty,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.status(200).json({
+    updatedProduct,
+    msg: "Product updated successfully",
+  });
+});
+
+/*****************************************************
+ * @desc   Delete  products
+ * @route  DELETE /api/v1/products/:id
+ * @access Admin/private
+ *****************************************************/
+
+export const deleteProduct = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+
+  await product.deleteOne();
+
+  res.status(200).json({
+    msg: "Product deleted successfully",
+  });
+});
