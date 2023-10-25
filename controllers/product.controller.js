@@ -1,3 +1,4 @@
+import Brand from "../model/brand.schema.js";
 import Category from "../model/category.schema.js";
 import Product from "../model/product.schema.js";
 import asyncHandler from "express-async-handler";
@@ -21,10 +22,21 @@ export const createProduct = asyncHandler(async (req, res) => {
     totalQty,
   } = req.body;
 
-  // product exists
+  const brandExists = await Brand.findOne({ nam: brand });
+  if (brandExists) {
+    throw new Error("Brand already exists");
+  }
+
+  // Product exists
   const productExists = await Product.findOne({ name });
   if (productExists) {
     throw new Error("Product already exists");
+  }
+
+  const brandFound = await Brand.findOne({ name: brand.toLowerCase() });
+
+  if (!brandFound) {
+    throw new Error("Brand not found");
   }
 
   // find the category
@@ -49,6 +61,10 @@ export const createProduct = asyncHandler(async (req, res) => {
   // push the product to category
   categoryFound.products.push(product._id);
   await categoryFound.save();
+
+  // push the product to brand
+  brandFound.products.push(product._id);
+  await brandFound.save();
 
   res.status(201).json({
     product,
