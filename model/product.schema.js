@@ -63,4 +63,16 @@ const productSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true } }
 );
 
+// virtuals to calculate total reviews and average rating
+productSchema.virtual("totalReviews").get(function () {
+  return this.reviews.length;
+});
+// calculate average rating
+productSchema.virtual("avgRating").get(function () {
+  const totalRating = this.reviews.reduce((acc, review) => {
+    return acc + review.rating;
+  }, 0);
+  return totalRating / this.reviews.length;
+});
+
 export default mongoose.model("Product", productSchema);
