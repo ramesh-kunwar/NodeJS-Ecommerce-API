@@ -1,3 +1,4 @@
+import Category from "../model/category.schema.js";
 import Product from "../model/product.schema.js";
 import asyncHandler from "express-async-handler";
 
@@ -26,6 +27,13 @@ export const createProduct = asyncHandler(async (req, res) => {
     throw new Error("Product already exists");
   }
 
+  // find the category
+  const categoryFound = await Category.findOne({ name: category });
+
+  if (!categoryFound) {
+    throw new Error("Category not found");
+  }
+
   const product = await Product.create({
     name,
     description,
@@ -39,6 +47,8 @@ export const createProduct = asyncHandler(async (req, res) => {
   });
 
   // push the product to category
+  categoryFound.products.push(product._id);
+  await categoryFound.save();
 
   res.status(201).json({
     product,
